@@ -2,9 +2,11 @@
 let state = {
   posts: [],
   profile: {},
+  highlights: [], // Array of highlights
   activePost: null,
   activeMediaIndex: 0,
   uploadedMedia: [], // Array of { file, url, type }
+  uploadedHighlightCover: null, // Blob/File
   createActiveIndex: 0,
   isMuted: true
 };
@@ -31,6 +33,10 @@ const elements = {
   btnEditProfile: document.getElementById('btn-edit-profile'),
   btnShareProfile: document.getElementById('btn-share-profile'),
 
+  // Highlights
+  highlightsList: document.getElementById('highlights-list'),
+  btnNewHighlight: document.getElementById('btn-new-highlight'),
+
   // Grid
   postsGrid: document.getElementById('posts-grid-element'),
   emptyState: document.getElementById('posts-empty-state'),
@@ -53,6 +59,15 @@ const elements = {
   createModalUsername: document.getElementById('create-modal-username'),
   fieldCaption: document.getElementById('field-caption'),
   btnClearMedia: document.getElementById('btn-clear-media'),
+
+  // Modal: Create Highlight
+  modalCreateHighlight: document.getElementById('modal-create-highlight'),
+  createHighlightCancel: document.getElementById('create-highlight-cancel'),
+  createHighlightSave: document.getElementById('create-highlight-save'),
+  highlightCoverPreview: document.getElementById('highlight-cover-preview'),
+  btnChangeHighlightCoverTrigger: document.getElementById('btn-change-highlight-cover-trigger'),
+  inputHighlightCover: document.getElementById('input-highlight-cover'),
+  fieldHighlightName: document.getElementById('field-highlight-name'),
 
   // Modal: Post Detail
   modalPostDetail: document.getElementById('modal-post-detail'),
@@ -94,6 +109,7 @@ const elements = {
 // Temporary object URL cache to clean up memory
 let avatarObjectURL = null;
 let postObjectURLs = [];
+let highlightObjectURLs = [];
 
 // Initialize App
 async function init() {
@@ -102,6 +118,10 @@ async function init() {
     state.profile = await window.db.getProfile();
     applyTheme(state.profile.theme || 'light');
     renderProfileInfo();
+
+    // Load Highlights
+    state.highlights = await window.db.getAllHighlights();
+    renderHighlights();
 
     // Load Posts
     state.posts = await window.db.getAllPosts();
@@ -1039,27 +1059,134 @@ function attachEventListeners() {
         } else if (overlay === elements.modalEditProfile) {
           elements.modalEditProfile.classList.remove('active');
           elements.inputAvatar.value = '';
+        } else if (overlay === elements.modalCreateHighlight) {
+          closeCreateHighlightModal();
         }
       }
     });
   });
 
-  // Highlight stories triggers (simulates highlight addition)
-  document.getElementById('btn-new-highlight').addEventListener('click', () => {
-    const name = prompt('ハイライトの名前を入力してください:');
-    if (!name) return;
-    
+  // Highlight stories triggers
+  elements.btnNewHighlight.addEventListener('click', openCreateHighlightModal);
+  elements.createHighlightCancel.addEventListener('click', closeCreateHighlightModal);
+  elements.createHighlightSave.addEventListener('click', saveNewHighlight);
+
+  elements.btnChangeHighlightCoverTrigger.addEventListener('click', (e) => {
+    e.stopPropagation(); // prevent bubbling if nested
+    elements.inputHighlightCover.click();
+  });
+  elements.inputHighlightCover.addEventListener('change', handleHighlightCoverSelect);
+  elements.fieldHighlightName.addEventListener('input', checkHighlightFormValidity);
+}
+
+// ----------------------------------------------------
+// STORIES HIGHLIGHTS SYSTEM
+// ----------------------------------------------------
+function renderHighlights() {
+  // Clear old Object URLs
+  highlightObjectURLs.forEach(url => URL.revokeObjectURL(url));
+  highlightObjectURLs = [];
+
+  // Remove existing highlight items except the "New" button
+  const items = Array.from(elements.highlightsList.querySelectorAll('.highlight-item'));
+  items.forEach(item => {
+    if (item.id !== 'btn-new-highlight') {
+      item.remove();
+    }
+  });
+
+  // Render each highlight
+  state.highlights.forEach(hl => {
     const highlightItem = document.createElement('div');
     highlightItem.className = 'highlight-item';
+    highlightItem.setAttribute('data-id', hl.id);
+
+    // Cover URL
+    let coverUrl = '';
+    if (hl.cover) {
+      coverUrl = URL.createObjectURL(hl.cover);
+      highlightObjectURLs.push(coverUrl);
+    } else {
+      // Default placeholder
+      coverUrl = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23efefef'/><path d='M50 50c11 0 20-9 20-20s-9-20-20-20-20 9-20 20 9 20 20 20zm0 8c-15 0-45 8-45 23v5h90v-5c0-15-30-23-45-23z' fill='%238e8e8e'/></svg>";
+    }
+
     highlightItem.innerHTML = `
+      <button class="btn-delete-highlight" aria-label="削除">&times;</button>
       <div class="highlight-circle">
-        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%238e8e8e'/></svg>" alt="${name}">
+        <img src="${coverUrl}" alt="${hl.name}">
       </div>
-      <span class="highlight-title">${name}</span>
+      <span class="highlight-title">${hl.name}</span>
     `;
-    elements.btnNewHighlight = document.getElementById('btn-new-highlight');
-    elements.btnNewHighlight.parentNode.appendChild(highlightItem);
+
+    // Click on delete button
+    const deleteBtn = highlightItem.querySelector('.btn-delete-highlight');
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent modal or other events
+      deleteHighlightItem(hl.id);
+    });
+
+    // Tap highlight circle (shows alert for mock preview)
+    highlightItem.addEventListener('click', () => {
+      alert(`ハイライト: ${hl.name}`);
+    });
+
+    elements.highlightsList.appendChild(highlightItem);
   });
+}
+
+async function deleteHighlightItem(id) {
+  const confirmed = confirm('このハイライトを削除しますか？');
+  if (!confirmed) return;
+
+  await window.db.deleteHighlight(id);
+  state.highlights = state.highlights.filter(h => h.id !== id);
+  renderHighlights();
+}
+
+function openCreateHighlightModal() {
+  state.uploadedHighlightCover = null;
+  elements.fieldHighlightName.value = '';
+  elements.highlightCoverPreview.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23efefef'/><path d='M50 50c11 0 20-9 20-20s-9-20-20-20-20 9-20 20 9 20 20 20zm0 8c-15 0-45 8-45 23v5h90v-5c0-15-30-23-45-23z' fill='%238e8e8e'/></svg>";
+  elements.createHighlightSave.disabled = true;
+  elements.modalCreateHighlight.classList.add('active');
+}
+
+function closeCreateHighlightModal() {
+  elements.modalCreateHighlight.classList.remove('active');
+  elements.inputHighlightCover.value = '';
+  state.uploadedHighlightCover = null;
+}
+
+function handleHighlightCoverSelect(e) {
+  if (e.target.files && e.target.files[0]) {
+    const file = e.target.files[0];
+    state.uploadedHighlightCover = file;
+    elements.highlightCoverPreview.src = URL.createObjectURL(file);
+  }
+}
+
+async function saveNewHighlight() {
+  const name = elements.fieldHighlightName.value.trim();
+  if (!name) return;
+
+  const newHighlight = {
+    id: Date.now(),
+    name: name,
+    cover: state.uploadedHighlightCover, // Blob or null
+    orderIndex: state.highlights.length,
+    createdAt: new Date().toISOString()
+  };
+
+  await window.db.saveHighlight(newHighlight);
+  state.highlights.push(newHighlight);
+  renderHighlights();
+  closeCreateHighlightModal();
+}
+
+function checkHighlightFormValidity() {
+  const name = elements.fieldHighlightName.value.trim();
+  elements.createHighlightSave.disabled = !name;
 }
 
 // ----------------------------------------------------

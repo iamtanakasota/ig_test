@@ -1,5 +1,5 @@
 const DB_NAME = 'InstagramPlannerDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbInstance = null;
 
@@ -15,6 +15,9 @@ function getDB() {
       }
       if (!db.objectStoreNames.contains('profile')) {
         db.createObjectStore('profile', { keyPath: 'key' });
+      }
+      if (!db.objectStoreNames.contains('highlights')) {
+        db.createObjectStore('highlights', { keyPath: 'id' });
       }
     };
 
@@ -96,7 +99,7 @@ const db = {
     const database = await getDB();
     return new Promise((resolve, reject) => {
       const transaction = database.transaction('profile', 'readonly');
-      const store = transaction.objectStore('profile');
+      const store = database.transaction('profile', 'readonly').objectStore('profile');
       const request = store.get('profileData');
 
       request.onsuccess = () => {
@@ -130,6 +133,63 @@ const db = {
 
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject('Error saving profile');
+    });
+  },
+
+  // Highlight Operations
+  getAllHighlights: async () => {
+    const database = await getDB();
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction('highlights', 'readonly');
+      const store = transaction.objectStore('highlights');
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        const highlights = request.result || [];
+        // Sort by order or creation time
+        highlights.sort((a, b) => a.orderIndex - b.orderIndex);
+        resolve(highlights);
+      };
+      request.onerror = () => reject('Error getting highlights');
+    });
+  },
+
+  saveHighlight: async (highlight) => {
+    const database = await getDB();
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction('highlights', 'readwrite');
+      const store = transaction.objectStore('highlights');
+      const request = store.put(highlight);
+
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject('Error saving highlight');
+    });
+  },
+
+  deleteHighlight: async (id) => {
+    const database = await getDB();
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction('highlights', 'readwrite');
+      const store = transaction.objectStore('highlights');
+      const request = store.delete(id);
+
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject('Error deleting highlight');
+    });
+  },
+
+  saveAllHighlights: async (highlights) => {
+    const database = await getDB();
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction('highlights', 'readwrite');
+      const store = transaction.objectStore('highlights');
+
+      highlights.forEach((h) => {
+        store.put(h);
+      });
+
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject('Error saving multiple highlights');
     });
   }
 };
