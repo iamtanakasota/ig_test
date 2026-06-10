@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Instagram Feed Planner | インスタ下書き・グリッドシミュレータ</title>
+  <!-- Google Fonts for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Vanilla CSS stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-mode">
+  <div class="app-frame">
+
+
+    <!-- Mobile Viewport Container -->
+    <main class="viewport">
+      <!-- Instagram Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <span class="profile-username" id="header-username">your_username</span>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" class="icon-dropdown">
+            <path d="M12 16.5l-6-6h12z"/>
+          </svg>
+        </div>
+        <div class="header-right">
+          <!-- Create Post Button -->
+          <button class="header-btn" id="btn-create-post-header" aria-label="新規投稿追加">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="5" ry="5"></rect>
+              <line x1="12" y1="9" x2="12" y2="15"></line>
+              <line x1="9" y1="12" x2="15" y2="12"></line>
+            </svg>
+          </button>
+          <!-- Dark Mode Toggle Button -->
+          <button class="header-btn" id="btn-theme-toggle" aria-label="テーマ切り替え">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="theme-icon-light">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="theme-icon-dark" style="display: none;">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Profile Container -->
+      <section class="profile-container">
+        <!-- Profile Header (Avatar + Stats) -->
+        <div class="profile-header">
+          <div class="avatar-wrapper" id="btn-edit-avatar">
+            <div class="avatar-gradient"></div>
+            <div class="avatar-inner">
+              <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23efefef'/><path d='M50 50c11 0 20-9 20-20s-9-20-20-20-20 9-20 20 9 20 20 20zm0 8c-15 0-45 8-45 23v5h90v-5c0-15-30-23-45-23z' fill='%238e8e8e'/></svg>" alt="プロフィール画像" id="profile-avatar-img">
+            </div>
+            <div class="avatar-badge">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="profile-stats">
+            <div class="stat-item">
+              <span class="stat-num" id="stat-posts-count">0</span>
+              <span class="stat-label">投稿</span>
+            </div>
+            <div class="stat-item" id="btn-edit-followers">
+              <span class="stat-num" id="stat-followers-count">1,250</span>
+              <span class="stat-label">フォロワー</span>
+            </div>
+            <div class="stat-item" id="btn-edit-following">
+              <span class="stat-num" id="stat-following-count">380</span>
+              <span class="stat-label">フォロー中</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Bio -->
+        <div class="profile-bio">
+          <h2 class="profile-full-name" id="profile-fullname">Instagram Planner</h2>
+          <p class="profile-description" id="profile-bio-text">Grid Planner App 📱<br>Drag & drop to rearrange your posts.<br>Swipe post to view details! ✨</p>
+          <a href="#" class="profile-website" id="profile-website-link" target="_blank" rel="noopener noreferrer">github.com/google-deepmind</a>
+        </div>
+
+        <!-- Profile Buttons -->
+        <div class="profile-actions">
+          <button class="btn btn-secondary" id="btn-edit-profile">プロフィールを編集</button>
+          <button class="btn btn-secondary" id="btn-share-profile">プロフィールをシェア</button>
+        </div>
+      </section>
+
+      <!-- Highlights Stories -->
+      <section class="highlights-container">
+        <div class="highlight-item" id="btn-new-highlight">
+          <div class="highlight-circle add-highlight">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </div>
+          <span class="highlight-title">新規</span>
+        </div>
+        <div class="highlight-item">
+          <div class="highlight-circle">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23ff8a00'/></svg>" alt="Work">
+          </div>
+          <span class="highlight-title">Work</span>
+        </div>
+        <div class="highlight-item">
+          <div class="highlight-circle">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23ff007f'/></svg>" alt="Life">
+          </div>
+          <span class="highlight-title">Life</span>
+        </div>
+        <div class="highlight-item">
+          <div class="highlight-circle">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%2300bfff'/></svg>" alt="Travel">
+          </div>
+          <span class="highlight-title">Travel</span>
+        </div>
+      </section>
+
+      <!-- Tabs Navigation -->
+      <div class="tabs-header">
+        <button class="tab-item active" id="tab-grid" aria-label="グリッド表示">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+            <path d="M22 10.5H13.5V2H22V10.5ZM13.5 22H22V13.5H13.5V22ZM10.5 10.5V2H2V10.5H10.5ZM2 22H10.5V13.5H2V22Z"/>
+          </svg>
+        </button>
+        <button class="tab-item disabled" id="tab-reels" aria-label="リール表示" disabled>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+          </svg>
+        </button>
+        <button class="tab-item disabled" id="tab-tagged" aria-label="タグ付け表示" disabled>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Feed Post Grid -->
+      <section class="posts-grid-container">
+        <!-- Empty State Container -->
+        <div class="empty-state" id="posts-empty-state">
+          <div class="empty-icon-circle">
+            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+          </div>
+          <h3>まだ投稿はありません</h3>
+          <p>最初の写真や動画を追加して、フィードのシミュレーションを開始しましょう！</p>
+          <button class="btn btn-primary" id="btn-empty-create">写真を投稿する</button>
+        </div>
+
+        <!-- Real Post Grid Grid layout -->
+        <div class="posts-grid" id="posts-grid-element">
+          <!-- Dynamically generated elements will go here -->
+        </div>
+      </section>
+
+      <!-- Bottom Navigation Bar -->
+      <nav class="bottom-nav">
+        <button class="nav-item" id="nav-btn-home" aria-label="ホーム">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+            <path d="M9.005 16.545a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1h5.99a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1zm-4 4.5h13.99a3 3 0 0 0 3-3V11.5a3 3 0 0 0-1.074-2.289l-5.99-5.11a3.003 3.003 0 0 0-3.842 0l-5.99 5.11A3 3 0 0 0 2.015 11.5v6.545a3 3 0 0 0 3 3z"/>
+          </svg>
+        </button>
+        <button class="nav-item" id="nav-btn-search" aria-label="検索">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+        <!-- Center plus button -->
+        <button class="nav-item add-post-btn" id="nav-btn-create" aria-label="新しい投稿を追加">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <button class="nav-item" id="nav-btn-reels" aria-label="リール">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+          </svg>
+        </button>
+        <button class="nav-item active" id="nav-btn-profile" aria-label="プロフィール">
+          <div class="nav-avatar-icon">
+            <img src="" alt="" id="nav-profile-avatar-img">
+          </div>
+        </button>
+      </nav>
+    </main>
+  </div>
+
+  <!-- MODAL: Create / Upload Post -->
+  <div class="modal-overlay" id="modal-create-post">
+    <div class="modal-content modal-bottom-sheet">
+      <div class="modal-header">
+        <button class="btn-text cancel-btn" id="create-modal-cancel">キャンセル</button>
+        <h3 class="modal-title">新規投稿</h3>
+        <button class="btn-text action-btn" id="create-modal-share" disabled>シェア</button>
+      </div>
+      
+      <div class="modal-body post-create-body">
+        <!-- Input Selector Area (Empty State of Uploader) -->
+        <div class="file-drop-area" id="file-drop-zone">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          <p>複数選択可能。画像と動画に対応しています。</p>
+          <button class="btn btn-primary" id="btn-select-files">コンピュータから選択</button>
+          <input type="file" id="input-files" multiple accept="image/*,video/*" style="display: none;">
+        </div>
+
+        <!-- Media Selected Preview and Details -->
+        <div class="post-preview-container" id="post-preview-container" style="display: none;">
+          <!-- Left: Media Carousel Preview -->
+          <div class="carousel-preview-wrapper">
+            <div class="carousel-track" id="create-preview-track">
+              <!-- Dynamically populated previews -->
+            </div>
+            <!-- Indicator Dots -->
+            <div class="carousel-dots" id="create-preview-dots"></div>
+          </div>
+          
+          <!-- Right: Details Input -->
+          <div class="post-fields-form">
+            <div class="form-row profile-row-small">
+              <div class="small-avatar">
+                <img src="" alt="" class="current-avatar-ref">
+              </div>
+              <span class="small-username" id="create-modal-username">your_username</span>
+            </div>
+            <textarea id="field-caption" class="caption-textarea" placeholder="キャプションを書く..." rows="4"></textarea>
+            
+            <div class="preview-actions">
+              <button class="btn btn-danger-text" id="btn-clear-media">メディアをクリア</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Post Detail View -->
+  <div class="modal-overlay" id="modal-post-detail">
+    <div class="modal-content modal-fullscreen">
+      <div class="modal-header">
+        <button class="btn-icon" id="detail-modal-back" aria-label="戻る">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+        </button>
+        <h3 class="modal-title">投稿</h3>
+        <button class="btn-icon text-danger" id="detail-modal-delete" aria-label="削除">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body post-detail-body">
+        <!-- Single Post Detail View (simulates standard instagram post feed element) -->
+        <article class="instagram-post">
+          <!-- Post Author Header -->
+          <div class="post-header">
+            <div class="post-author-avatar">
+              <img src="" alt="" class="current-avatar-ref">
+            </div>
+            <div class="post-author-info">
+              <span class="post-author-username" id="detail-username">your_username</span>
+              <span class="post-location">Tokyo, Japan</span>
+            </div>
+            <button class="post-menu-btn" aria-label="オプション">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <circle cx="12" cy="12" r="1.5"></circle>
+                <circle cx="6" cy="12" r="1.5"></circle>
+                <circle cx="18" cy="12" r="1.5"></circle>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Post Media Viewer (with Slider & Video Mute overlays) -->
+          <div class="post-media-stage" id="detail-media-stage">
+            <div class="media-track" id="detail-media-track">
+              <!-- Dynamically populated images/videos -->
+            </div>
+            <!-- Arrow controls (Overlay) -->
+            <button class="media-nav-btn prev-btn" id="detail-nav-prev" aria-label="前へ">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <button class="media-nav-btn next-btn" id="detail-nav-next" aria-label="次へ">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+            
+            <!-- Video Mute Overlay Button -->
+            <button class="video-sound-btn" id="detail-sound-btn" style="display: none;" aria-label="消音切り替え">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="sound-on-icon">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15.5l-5-5h-3v-4h3l5-5v14zm2-7c.85 0 1.5.65 1.5 1.5s-.65 1.5-1.5 1.5V10.5z"/>
+              </svg>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="sound-off-icon" style="display: none;">
+                <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.26 2.5-4.02zM12 4L9.91 6.09 12 8.18V4zm-8.27-.27L2.33 5.13 6.2 9H3v6h4l5 5v-6.8l5.25 5.25c-.58.44-1.23.79-1.95.98v2.04c1.27-.27 2.42-.89 3.39-1.76l2.18 2.18 1.41-1.41L3.73 3.73z"/>
+              </svg>
+            </button>
+
+            <!-- Big Heart Pop Animation (on double tap) -->
+            <div class="double-tap-heart" id="detail-double-tap-heart">
+              <svg viewBox="0 0 24 24" width="80" height="80" fill="currentColor">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Bottom indicators -->
+          <div class="post-media-dots" id="detail-media-dots"></div>
+
+          <!-- Post Actions Button Bar -->
+          <div class="post-actions-bar">
+            <div class="actions-left">
+              <button class="action-btn-item" id="detail-btn-like" aria-label="いいね">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" class="like-icon-outline">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" class="like-icon-filled" style="display: none;">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+              </button>
+              <button class="action-btn-item" aria-label="コメントする">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                </svg>
+              </button>
+              <button class="action-btn-item" aria-label="シェア">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </div>
+            <div class="actions-right">
+              <button class="action-btn-item" aria-label="ブックマーク">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Likes Count -->
+          <div class="post-likes-info">
+            <span class="likes-text" id="detail-likes-text">いいね！0件</span>
+          </div>
+
+          <!-- Caption & Comments Section -->
+          <div class="post-details-info">
+            <div class="caption-comment">
+              <span class="username-bold" id="detail-caption-username">your_username</span>
+              <span class="caption-text-content" id="detail-caption-text">投稿内容のキャプションがここに表示されます。</span>
+            </div>
+            <!-- Simulated time -->
+            <div class="post-time-stamp" id="detail-time-stamp">1時間前</div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Edit Profile -->
+  <div class="modal-overlay" id="modal-edit-profile">
+    <div class="modal-content modal-bottom-sheet">
+      <div class="modal-header">
+        <button class="btn-text cancel-btn" id="edit-profile-cancel">キャンセル</button>
+        <h3 class="modal-title">プロフィールの編集</h3>
+        <button class="btn-text action-btn" id="edit-profile-save">完了</button>
+      </div>
+      
+      <div class="modal-body">
+        <form class="edit-profile-form" id="form-edit-profile" onsubmit="return false;">
+          <!-- Avatar picker -->
+          <div class="avatar-edit-wrapper">
+            <div class="avatar-inner-medium">
+              <img src="" alt="" id="edit-profile-avatar-preview">
+            </div>
+            <button class="btn-text link-btn" id="btn-change-photo-trigger">プロフィール写真を変更</button>
+            <input type="file" id="input-avatar" accept="image/*" style="display: none;">
+          </div>
+
+          <div class="form-input-group">
+            <label for="edit-username">ユーザー名</label>
+            <input type="text" id="edit-username" class="form-input" placeholder="ユーザー名">
+          </div>
+
+          <div class="form-input-group">
+            <label for="edit-fullname">名前</label>
+            <input type="text" id="edit-fullname" class="form-input" placeholder="名前">
+          </div>
+
+          <div class="form-input-group">
+            <label for="edit-website">ウェブサイト</label>
+            <input type="text" id="edit-website" class="form-input" placeholder="ウェブサイトのリンク">
+          </div>
+
+          <div class="form-input-group">
+            <label for="edit-bio">自己紹介</label>
+            <textarea id="edit-bio" class="form-input" rows="3" placeholder="自己紹介"></textarea>
+          </div>
+
+          <div class="form-grid-row">
+            <div class="form-input-group">
+              <label for="edit-followers">フォロワー数</label>
+              <input type="number" id="edit-followers" class="form-input" placeholder="1250">
+            </div>
+            <div class="form-input-group">
+              <label for="edit-following">フォロー数</label>
+              <input type="number" id="edit-following" class="form-input" placeholder="380">
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- IndexedDB Wrapper -->
+  <script src="db.js?v=1.0.2"></script>
+  <!-- Main Logic -->
+  <script src="app.js?v=1.0.2"></script>
+</body>
+</html>
