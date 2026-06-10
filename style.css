@@ -527,6 +527,9 @@ body.dark-mode .profile-website {
   background-color: var(--bg-secondary);
   overflow: hidden;
   touch-action: none; /* Crucial for touch dragging */
+  -webkit-touch-callout: none; /* iOS Safari: disable callout image menu */
+  -webkit-user-select: none; /* Disable text/image selection */
+  user-select: none;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -536,6 +539,7 @@ body.dark-mode .profile-website {
   height: 100%;
   object-fit: cover;
   pointer-events: none; /* Ignore pointer events on inside media */
+  touch-action: none; /* Prevent browser touch behavior on media */
 }
 
 /* Badges for Multiple / Video posts */

@@ -334,8 +334,8 @@ let dragInfo = {
 
 function setupDragAndDrop(el) {
   el.addEventListener('pointerdown', (e) => {
-    // Only left click / single finger touch
-    if (e.button !== 0) return;
+    // Only left click for mouse; touch can bypass e.button checks
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
 
     dragInfo.isDragging = false;
     dragInfo.draggedEl = el;
@@ -349,10 +349,13 @@ function setupDragAndDrop(el) {
     const items = Array.from(elements.postsGrid.children);
     dragInfo.rects = items.map(item => item.getBoundingClientRect());
 
-    el.setPointerCapture(e.pointerId);
+    // Bind document-level listeners to track pointers anywhere, including outside elements
+    document.addEventListener('pointermove', onPointerMove, { passive: false });
+    document.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('pointercancel', onPointerCancel);
   });
 
-  el.addEventListener('pointermove', (e) => {
+  function onPointerMove(e) {
     if (!dragInfo.draggedEl || dragInfo.draggedEl !== el) return;
 
     const dx = e.clientX - dragInfo.startX;
@@ -370,6 +373,11 @@ function setupDragAndDrop(el) {
     }
 
     if (dragInfo.isDragging) {
+      // Prevent screen scrolling on mobile while actively dragging
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+
       // Apply offset transform
       el.style.transform = `translate(${dx}px, ${dy}px) scale(1.06)`;
 
@@ -395,12 +403,12 @@ function setupDragAndDrop(el) {
         updateVisualGridShifts();
       }
     }
-  });
+  }
 
-  el.addEventListener('pointerup', (e) => {
+  function onPointerUp(e) {
+    cleanupListeners();
+
     if (!dragInfo.draggedEl || dragInfo.draggedEl !== el) return;
-
-    el.releasePointerCapture(e.pointerId);
     
     // Clean up classes & styles
     el.classList.remove('is-dragging');
@@ -436,11 +444,12 @@ function setupDragAndDrop(el) {
 
     dragInfo.draggedEl = null;
     dragInfo.isDragging = false;
-  });
+  }
 
-  el.addEventListener('pointercancel', (e) => {
+  function onPointerCancel(e) {
+    cleanupListeners();
+
     if (!dragInfo.draggedEl) return;
-    el.releasePointerCapture(e.pointerId);
     el.classList.remove('is-dragging');
     el.style.transform = '';
     Array.from(elements.postsGrid.children).forEach(child => {
@@ -449,7 +458,13 @@ function setupDragAndDrop(el) {
     });
     dragInfo.draggedEl = null;
     dragInfo.isDragging = false;
-  });
+  }
+
+  function cleanupListeners() {
+    document.removeEventListener('pointermove', onPointerMove);
+    document.removeEventListener('pointerup', onPointerUp);
+    document.removeEventListener('pointercancel', onPointerCancel);
+  }
 }
 
 function updateVisualGridShifts() {
@@ -974,7 +989,8 @@ function attachEventListeners() {
   elements.btnClearMedia.addEventListener('click', openCreateModal);
 
   // Drag and Drop files selection
-  elements.btnSelectFiles.addEventListener('click', () => {
+  elements.btnSelectFiles.addEventListener('click', (e) => {
+    e.stopPropagation();
     elements.inputFiles.click();
   });
   elements.fileDropZone.addEventListener('click', () => {
