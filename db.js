@@ -8,6 +8,11 @@ function getDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
+    request.onblocked = () => {
+      console.warn("Database upgrade is blocked by another open connection. Please close other tabs of this app.");
+      alert("データベースの更新がブロックされました。他のタブでこのアプリを開いている場合は、それらを閉じて再読み込みしてください。");
+    };
+
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
       if (!db.objectStoreNames.contains('posts')) {
@@ -23,6 +28,15 @@ function getDB() {
 
     request.onsuccess = (event) => {
       dbInstance = event.target.result;
+      
+      // Close database connection if a version upgrade is requested elsewhere
+      dbInstance.onversionchange = () => {
+        dbInstance.close();
+        dbInstance = null;
+        console.warn("Database version changed elsewhere. Connection closed.");
+        alert("新しいバージョンのデータベースが利用可能です。ページを再読み込みしてください。");
+      };
+
       resolve(dbInstance);
     };
 
@@ -99,7 +113,7 @@ const db = {
     const database = await getDB();
     return new Promise((resolve, reject) => {
       const transaction = database.transaction('profile', 'readonly');
-      const store = database.transaction('profile', 'readonly').objectStore('profile');
+      const store = transaction.objectStore('profile');
       const request = store.get('profileData');
 
       request.onsuccess = () => {

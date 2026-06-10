@@ -1075,6 +1075,9 @@ function attachEventListeners() {
     e.stopPropagation(); // prevent bubbling if nested
     elements.inputHighlightCover.click();
   });
+  elements.highlightCoverPreview.addEventListener('click', () => {
+    elements.inputHighlightCover.click();
+  });
   elements.inputHighlightCover.addEventListener('change', handleHighlightCoverSelect);
   elements.fieldHighlightName.addEventListener('input', checkHighlightFormValidity);
 }
